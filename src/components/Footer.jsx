@@ -20,7 +20,7 @@ export default function Footer() {
           <div className="md:col-span-5 space-y-6">
             <Link to="/" className="inline-block">
               <img
-                src="/assets/cdi-logo.png"
+                src={`${import.meta.env.BASE_URL}assets/cdi-logo.png`}
                 alt="Chhichholiya Digital Industries Logo"
                 className="h-11 w-auto object-contain"
               />

@@ -12,7 +12,7 @@ export default function Vision({ onOpenProjectModal }) {
       {/* Subtle Background Monogram Silhouette */}
       <div className="absolute inset-0 flex items-center justify-center opacity-[0.03] pointer-events-none">
         <img
-          src="/assets/cdi-logo.png"
+          src={`${import.meta.env.BASE_URL}assets/cdi-logo.png`}
           alt=""
           className="w-[800px] max-w-full object-contain filter grayscale"
         />

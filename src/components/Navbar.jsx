@@ -54,7 +54,7 @@ export default function Navbar({ onOpenProjectModal }) {
           >
             <div className="relative h-10 sm:h-11 flex items-center">
               <img
-                src="/assets/cdi-logo.png"
+                src={`${import.meta.env.BASE_URL}assets/cdi-logo.png`}
                 alt="Chhichholiya Digital Industries Logo"
                 className="h-9 sm:h-10 w-auto object-contain transition-transform duration-300 group-hover:scale-105"
               />

@@ -31,7 +31,7 @@ export default function App() {
   };
 
   return (
-    <BrowserRouter>
+    <BrowserRouter basename={import.meta.env.BASE_URL}>
       <div className="relative bg-cdi-black text-cdi-white min-h-screen selection:bg-cdi-gold selection:text-cdi-black flex flex-col justify-between">
         {/* Scroll Reset on route change */}
         <ScrollToTop />

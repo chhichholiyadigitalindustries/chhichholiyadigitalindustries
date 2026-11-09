@@ -181,7 +181,7 @@ export default function VideoPlayerModal({
                 <>
                   <video
                     ref={videoRef}
-                    src={project.videoSrc}
+                    src={project.videoSrc?.startsWith('/') ? `${import.meta.env.BASE_URL}${project.videoSrc.slice(1)}` : project.videoSrc}
                     poster={project.thumbnail}
                     autoPlay
                     playsInline

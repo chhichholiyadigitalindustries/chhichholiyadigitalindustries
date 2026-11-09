@@ -16,7 +16,7 @@ export default function CTA({ onOpenProjectModal }) {
       {/* Background Animated Monogram Watermark */}
       <div className="absolute inset-0 flex items-center justify-center opacity-5 pointer-events-none">
         <motion.img
-          src="/assets/cdi-logo.png"
+          src={`${import.meta.env.BASE_URL}assets/cdi-logo.png`}
           alt=""
           className="w-[700px] max-w-full object-contain filter drop-shadow-[0_0_50px_#D6A33A]"
           animate={{ scale: [1, 1.05, 1], opacity: [0.04, 0.08, 0.04] }}
