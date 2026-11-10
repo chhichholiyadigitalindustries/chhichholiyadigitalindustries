@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://chhichholiyadigitalindustries.github.io/chhichholiyadigitalindustries/sitemap.xml

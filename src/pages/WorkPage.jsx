@@ -18,7 +18,10 @@ import {
 } from 'lucide-react';
 import PageHeader from '../components/PageHeader';
 import VideoPlayerModal from '../components/VideoPlayerModal';
-import { WORK_PROJECTS, WORK_CATEGORIES, WORK_STATS } from '../data/workGalleryData';
+import SeoHead from '../components/SeoHead';
+import { CORE_SEO_PAGES } from '../data/seoConfig';
+import { resolvePublicAsset } from '../config/brand';
+import { WORK_PROJECTS, WORK_CATEGORIES, WORK_CLASSIFICATION_PILLARS } from '../data/workGalleryData';
 
 export default function WorkPage({ onOpenProjectModal }) {
   const [searchQuery, setSearchQuery] = useState('');
@@ -47,37 +50,45 @@ export default function WorkPage({ onOpenProjectModal }) {
     });
   }, [searchQuery, selectedCategory]);
 
+  const seo = CORE_SEO_PAGES['/work'];
+
   return (
     <div className="overflow-hidden">
+      <SeoHead
+        route={seo.route}
+        title={seo.title}
+        description={seo.description}
+        breadcrumbs={seo.breadcrumbs}
+      />
       {/* 1. HERO HEADER */}
       <PageHeader
-        eyebrow="WORK GALLERY & VIDEO SHOWCASE"
+        eyebrow="WORK GALLERY & PROJECT DEMONSTRATIONS"
         title="ENGINEERED WORK &"
         highlightTitle="VIDEO DEMOS"
-        description="Step inside our engineering showcase. Watch authentic video walkthroughs of production web architectures, Android POS systems, conversational AI engines, and enterprise platforms built by Chhichholiya Digital Industries."
+        description="Explore completed client platforms, concept demonstrations, internal product builds, and AI prototypes engineered by Chhichholiya Digital Industries."
         breadcrumbs={[
           { name: 'Home', path: '/' },
           { name: 'Work Gallery', path: '/work' }
         ]}
       />
 
-      {/* 2. STATS BAR */}
-      <section className="relative py-12 bg-[#090909] border-b border-white/5">
+      {/* 2. PROJECT CLASSIFICATION GUIDE (HONEST TRANSPARENCY) */}
+      <section className="relative py-10 bg-[#090909] border-b border-white/5">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
-            {WORK_STATS.map((stat, idx) => (
-              <div 
-                key={idx}
-                className="p-6 rounded-2xl bg-[#111111] border border-white/5 text-center space-y-1"
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            {WORK_CLASSIFICATION_PILLARS.map((pillar, idx) => (
+              <div
+                key={pillar.label}
+                className="p-5 rounded-2xl bg-[#111111] border border-white/5 space-y-1.5"
               >
-                <span className="text-3xl sm:text-4xl font-extrabold text-gold-gradient font-mono block">
-                  {stat.value}
+                <span className="text-[11px] font-mono text-cdi-gold uppercase tracking-wider block">
+                  0{idx + 1} // CLASSIFICATION
                 </span>
-                <h4 className="text-xs sm:text-sm font-bold text-cdi-white font-display uppercase tracking-wide">
-                  {stat.label}
-                </h4>
-                <p className="text-[11px] font-mono text-cdi-silver-muted">
-                  {stat.sub}
+                <h2 className="text-sm font-bold text-cdi-white font-display uppercase tracking-wide">
+                  {pillar.label}
+                </h2>
+                <p className="text-xs text-cdi-silver-muted font-light leading-relaxed">
+                  {pillar.desc}
                 </p>
               </div>
             ))}
@@ -180,10 +191,13 @@ export default function WorkPage({ onOpenProjectModal }) {
                       className="relative aspect-video w-full overflow-hidden bg-black cursor-pointer"
                     >
                       <img
-                        src={project.thumbnail}
+                        src={resolvePublicAsset(project.thumbnail)}
                         alt={project.title}
+                        width={960}
+                        height={540}
                         className="w-full h-full object-cover opacity-80 group-hover:opacity-95 group-hover:scale-105 transition-all duration-500"
                         loading="lazy"
+                        decoding="async"
                       />
                       <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/30 to-transparent" />
 
@@ -195,11 +209,11 @@ export default function WorkPage({ onOpenProjectModal }) {
                       </div>
 
                       {/* Badges on Video Top */}
-                      <div className="absolute top-3.5 left-3.5 right-3.5 flex items-center justify-between">
-                        <span className="px-2.5 py-1 rounded-md bg-black/70 backdrop-blur-md border border-white/10 text-[10px] font-mono text-cdi-gold uppercase tracking-wider">
-                          {project.category}
+                      <div className="absolute top-3.5 left-3.5 right-3.5 flex items-center justify-between gap-2">
+                        <span className="px-2.5 py-1 rounded-md bg-black/75 backdrop-blur-md border border-cdi-gold/40 text-[10px] font-mono text-cdi-gold uppercase tracking-wider truncate">
+                          {project.projectClassification}
                         </span>
-                        <span className="px-2.5 py-1 rounded-md bg-black/70 backdrop-blur-md border border-white/10 text-[10px] font-mono text-cdi-white flex items-center gap-1">
+                        <span className="px-2.5 py-1 rounded-md bg-black/70 backdrop-blur-md border border-white/10 text-[10px] font-mono text-cdi-white flex items-center gap-1 shrink-0">
                           <Clock className="w-3 h-3 text-cdi-gold" />
                           <span>{project.duration}</span>
                         </span>
@@ -208,7 +222,7 @@ export default function WorkPage({ onOpenProjectModal }) {
                       {/* Client info */}
                       <div className="absolute bottom-3 left-3.5 right-3.5">
                         <span className="text-[11px] font-mono text-cdi-silver/90">
-                          {project.client}
+                          {project.category} • {project.client}
                         </span>
                       </div>
                     </div>
@@ -249,22 +263,6 @@ export default function WorkPage({ onOpenProjectModal }) {
                         ))}
                       </div>
 
-                      {/* Metrics strip */}
-                      {project.metrics && (
-                        <div className="grid grid-cols-3 gap-2 pt-3 border-t border-white/5">
-                          {project.metrics.map((m, i) => (
-                            <div key={i} className="p-1.5 rounded-lg bg-[#141414] text-center">
-                              <span className="text-xs font-mono font-bold text-cdi-gold block">
-                                {m.value}
-                              </span>
-                              <span className="text-[9px] font-mono text-cdi-silver-muted block truncate">
-                                {m.label}
-                              </span>
-                            </div>
-                          ))}
-                        </div>
-                      )}
-
                       {/* Action Bar */}
                       <div className="pt-4 border-t border-white/5 flex items-center justify-between">
                         <button
@@ -272,7 +270,7 @@ export default function WorkPage({ onOpenProjectModal }) {
                           className="inline-flex items-center gap-2 text-xs font-mono uppercase tracking-wider text-cdi-gold hover:text-cdi-gold-light transition-colors"
                         >
                           <Play className="w-3.5 h-3.5 fill-current" />
-                          <span>Watch Video Demo</span>
+                          <span>{project.videoType === 'none' ? 'View Architecture' : 'Watch Video Demo'}</span>
                         </button>
 
                         <button

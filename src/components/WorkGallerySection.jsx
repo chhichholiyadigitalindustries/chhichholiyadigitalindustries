@@ -13,6 +13,7 @@ import {
   ChevronRight
 } from 'lucide-react';
 import { WORK_PROJECTS, WORK_CATEGORIES } from '../data/workGalleryData';
+import { resolvePublicAsset } from '../config/brand';
 import VideoPlayerModal from './VideoPlayerModal';
 
 export default function WorkGallerySection({ onOpenProjectModal }) {
@@ -95,10 +96,13 @@ export default function WorkGallerySection({ onOpenProjectModal }) {
                   className="relative aspect-video w-full overflow-hidden bg-black cursor-pointer"
                 >
                   <img
-                    src={project.thumbnail}
+                    src={resolvePublicAsset(project.thumbnail)}
                     alt={project.title}
+                    width={960}
+                    height={540}
                     className="w-full h-full object-cover opacity-80 group-hover:opacity-95 group-hover:scale-105 transition-all duration-500"
                     loading="lazy"
+                    decoding="async"
                   />
                   <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/30 to-transparent" />
 
@@ -110,11 +114,11 @@ export default function WorkGallerySection({ onOpenProjectModal }) {
                   </div>
 
                   {/* Top Badges */}
-                  <div className="absolute top-3.5 left-3.5 right-3.5 flex items-center justify-between">
-                    <span className="px-2.5 py-1 rounded-md bg-black/70 backdrop-blur-md border border-white/10 text-[10px] font-mono text-cdi-gold uppercase tracking-wider">
-                      {project.category}
+                  <div className="absolute top-3.5 left-3.5 right-3.5 flex items-center justify-between gap-2">
+                    <span className="px-2.5 py-1 rounded-md bg-black/75 backdrop-blur-md border border-cdi-gold/40 text-[10px] font-mono text-cdi-gold uppercase tracking-wider truncate">
+                      {project.projectClassification}
                     </span>
-                    <span className="px-2 py-1 rounded-md bg-black/70 backdrop-blur-md border border-white/10 text-[10px] font-mono text-cdi-white flex items-center gap-1">
+                    <span className="px-2 py-1 rounded-md bg-black/70 backdrop-blur-md border border-white/10 text-[10px] font-mono text-cdi-white flex items-center gap-1 shrink-0">
                       <Clock className="w-3 h-3 text-cdi-gold" />
                       <span>{project.duration}</span>
                     </span>
@@ -122,8 +126,8 @@ export default function WorkGallerySection({ onOpenProjectModal }) {
 
                   {/* Bottom Strip on Thumbnail */}
                   <div className="absolute bottom-3 left-3.5 right-3.5">
-                    <span className="text-[11px] font-mono text-cdi-silver/80">
-                      Client: {project.client}
+                    <span className="text-[11px] font-mono text-cdi-silver/90">
+                      {project.category} • {project.client}
                     </span>
                   </div>
                 </div>
@@ -166,7 +170,7 @@ export default function WorkGallerySection({ onOpenProjectModal }) {
                       className="inline-flex items-center gap-2 text-xs font-mono uppercase tracking-wider text-cdi-gold hover:text-cdi-gold-light transition-colors"
                     >
                       <Play className="w-3.5 h-3.5 fill-current" />
-                      <span>Watch Demo Video</span>
+                      <span>{project.videoType === 'none' ? 'View Architecture Spec' : 'Watch Demo Video'}</span>
                     </button>
                     <span className="text-xs font-mono text-white/20">
                       {project.year}

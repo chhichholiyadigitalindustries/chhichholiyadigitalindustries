@@ -17,6 +17,8 @@ import {
   Code
 } from 'lucide-react';
 import PageHeader from '../components/PageHeader';
+import SeoHead from '../components/SeoHead';
+import { CORE_SEO_PAGES } from '../data/seoConfig';
 
 const STANDARDS_DETAILED = [
   {
@@ -107,8 +109,16 @@ const LIFECYCLE_STEPS = [
 ];
 
 export default function EngineeringPage() {
+  const seo = CORE_SEO_PAGES['/engineering'];
+
   return (
     <div className="overflow-hidden bg-cdi-black text-cdi-white">
+      <SeoHead
+        route={seo.route}
+        title={seo.title}
+        description={seo.description}
+        breadcrumbs={seo.breadcrumbs}
+      />
       {/* 1. Page Header */}
       <PageHeader
         eyebrow="CREDENTIALS // ENGINEERING EXCELLENCE"

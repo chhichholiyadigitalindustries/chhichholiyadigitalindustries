@@ -1,6 +1,7 @@
 import React from 'react';
 import { motion } from 'framer-motion';
 import { Cpu, Layout, Sparkles, TrendingUp, Code2 } from 'lucide-react';
+import BrandLogo from './BrandLogo';
 
 const PILLARS = [
   {
@@ -74,9 +75,9 @@ export default function About() {
                     animate={{ rotate: 360 }}
                     transition={{ duration: 30, repeat: Infinity, ease: 'linear' }}
                   />
-                  <img
-                    src={`${import.meta.env.BASE_URL}assets/cdi-logo.png`}
+                  <BrandLogo
                     alt="Chhichholiya Digital Industries Monogram"
+                    loading="lazy"
                     className="w-full h-auto object-contain filter drop-shadow-[0_10px_25px_rgba(214,163,58,0.25)]"
                   />
                 </div>

@@ -19,6 +19,7 @@ import {
   ExternalLink,
   RotateCcw
 } from 'lucide-react';
+import { resolvePublicAsset } from '../config/brand';
 
 export default function VideoPlayerModal({ 
   isOpen, 
@@ -148,7 +149,7 @@ export default function VideoPlayerModal({
             <div className="flex items-center gap-3">
               <span className="w-2 h-2 rounded-full bg-cdi-gold animate-ping" />
               <span className="text-[11px] font-mono tracking-widest text-cdi-gold uppercase">
-                {project.category} // PROJECT VIDEO DEMO
+                {project.projectClassification || project.category} // {project.videoType === 'none' ? 'ARCHITECTURE OVERVIEW' : 'VIDEO SHOWCASE'}
               </span>
             </div>
             <button
@@ -169,7 +170,28 @@ export default function VideoPlayerModal({
               onMouseMove={handleMouseMove}
               className="lg:col-span-8 bg-black relative flex items-center justify-center min-h-[300px] sm:min-h-[420px] aspect-video group overflow-hidden"
             >
-              {project.videoType === 'youtube' ? (
+              {project.videoType === 'none' || !project.videoSrc ? (
+                <div className="relative w-full h-full flex items-center justify-center bg-[#090909]">
+                  <img
+                    src={resolvePublicAsset(project.thumbnail)}
+                    alt={project.title}
+                    width={960}
+                    height={540}
+                    className="w-full h-full object-cover opacity-35"
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black via-black/70 to-black/50 flex flex-col items-center justify-center p-8 text-center">
+                    <span className="px-3.5 py-1 rounded-full bg-cdi-gold/15 border border-cdi-gold/40 text-cdi-gold text-xs font-mono uppercase tracking-wider mb-3">
+                      {project.projectClassification}
+                    </span>
+                    <h4 className="text-xl sm:text-2xl font-extrabold text-cdi-white font-display uppercase max-w-md">
+                      {project.title}
+                    </h4>
+                    <p className="text-xs sm:text-sm text-cdi-silver-muted max-w-md mt-2 font-light">
+                      Video walkthrough is currently in internal engineering review. Inspect the architectural highlights and stack specification on the right or discuss a custom implementation with CDI.
+                    </p>
+                  </div>
+                </div>
+              ) : project.videoType === 'youtube' ? (
                 <iframe
                   src={`https://www.youtube.com/embed/${project.videoSrc}?autoplay=1&rel=0&modestbranding=1`}
                   title={project.title}
@@ -181,8 +203,8 @@ export default function VideoPlayerModal({
                 <>
                   <video
                     ref={videoRef}
-                    src={project.videoSrc?.startsWith('/') ? `${import.meta.env.BASE_URL}${project.videoSrc.slice(1)}` : project.videoSrc}
-                    poster={project.thumbnail}
+                    src={resolvePublicAsset(project.videoSrc)}
+                    poster={resolvePublicAsset(project.thumbnail)}
                     autoPlay
                     playsInline
                     muted={isMuted}
@@ -306,10 +328,10 @@ export default function VideoPlayerModal({
                 {/* Badges */}
                 <div className="flex items-center gap-2 flex-wrap">
                   <span className="px-2.5 py-1 rounded-md bg-cdi-gold/10 text-cdi-gold border border-cdi-gold/30 text-[10px] font-mono uppercase tracking-wider">
-                    {project.category}
+                    {project.projectClassification || project.category}
                   </span>
                   <span className="px-2.5 py-1 rounded-md bg-white/5 text-cdi-silver border border-white/10 text-[10px] font-mono">
-                    Year: {project.year}
+                    {project.category} • {project.year}
                   </span>
                 </div>
 

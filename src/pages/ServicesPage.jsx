@@ -20,6 +20,9 @@ import {
   Server
 } from 'lucide-react';
 import PageHeader from '../components/PageHeader';
+import SeoHead from '../components/SeoHead';
+import { CORE_SEO_PAGES } from '../data/seoConfig';
+import { SEO_LANDING_PAGES } from '../data/seoLandingPages';
 
 const SERVICES_DATA = [
   {
@@ -145,8 +148,16 @@ const SERVICES_DATA = [
 ];
 
 export default function ServicesPage() {
+  const seo = CORE_SEO_PAGES['/services'];
+
   return (
     <div className="overflow-hidden bg-cdi-black text-cdi-white">
+      <SeoHead
+        route={seo.route}
+        title={seo.title}
+        description={seo.description}
+        breadcrumbs={seo.breadcrumbs}
+      />
       {/* 1. Page Header */}
       <PageHeader
         eyebrow="CAPABILITIES // ENGINEERING DISCIPLINES"
@@ -250,6 +261,40 @@ export default function ServicesPage() {
                 </motion.div>
               );
             })}
+          </div>
+        </div>
+      </section>
+
+      {/* Dedicated India Solutions Directory */}
+      <section className="relative py-20 bg-cdi-black border-b border-white/5">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-8">
+          <div className="max-w-3xl">
+            <span className="text-xs font-mono text-cdi-gold uppercase tracking-widest block mb-2">
+              SPECIALIZED INDIA SOLUTIONS
+            </span>
+            <h2 className="text-2xl sm:text-4xl font-extrabold text-cdi-white font-display uppercase tracking-tight">
+              EXPLORE DEDICATED <span className="text-gold-gradient">SERVICE GUIDES</span>
+            </h2>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            {SEO_LANDING_PAGES.map((lp) => (
+              <Link
+                key={lp.slug}
+                to={lp.route}
+                className="p-5 rounded-2xl bg-[#111111] border border-white/10 hover:border-cdi-gold/50 transition-all group flex flex-col justify-between space-y-3"
+              >
+                <div className="space-y-1.5">
+                  <span className="text-[10px] font-mono text-cdi-gold uppercase tracking-wider block">
+                    {lp.serviceType}
+                  </span>
+                  <h3 className="text-sm font-bold text-cdi-white font-display group-hover:text-cdi-gold transition-colors">
+                    {lp.primaryKeyword}
+                  </h3>
+                </div>
+                <span className="text-[11px] font-mono text-cdi-silver-muted">Explore Service →</span>
+              </Link>
+            ))}
           </div>
         </div>
       </section>

@@ -18,6 +18,9 @@ import {
   Code
 } from 'lucide-react';
 import PageHeader from '../components/PageHeader';
+import SeoHead from '../components/SeoHead';
+import { CORE_SEO_PAGES } from '../data/seoConfig';
+import { CDI_BRAND } from '../config/brand';
 
 const PHILOSOPHY_POINTS = [
   {
@@ -39,8 +42,16 @@ const PHILOSOPHY_POINTS = [
 ];
 
 export default function AboutPage() {
+  const seo = CORE_SEO_PAGES['/about'];
+
   return (
     <div className="overflow-hidden bg-cdi-black text-cdi-white">
+      <SeoHead
+        route={seo.route}
+        title={seo.title}
+        description={seo.description}
+        breadcrumbs={seo.breadcrumbs}
+      />
       {/* 1. Page Header */}
       <PageHeader
         eyebrow="ABOUT // CHHICHHOLIYA DIGITAL INDUSTRIES"
@@ -104,15 +115,15 @@ export default function AboutPage() {
                     CORPORATE STATEMENT
                   </span>
                   <h3 className="text-xl font-bold text-cdi-white font-display uppercase">
-                    CHHICHOLIYA DIGITAL INDUSTRIES
+                    CHHICHHOLIYA DIGITAL INDUSTRIES
                   </h3>
                 </div>
                 <p className="text-xs text-cdi-silver-muted leading-relaxed font-light">
                   "We believe that great digital products are not accidental. They are the direct outcome of disciplined architecture, deep functional understanding and relentless attention to engineering detail."
                 </p>
                 <div className="pt-4 border-t border-white/5 flex items-center justify-between text-[11px] font-mono text-cdi-silver/70">
-                  <span>HEADQUARTERS: INDIA</span>
-                  <span className="text-cdi-gold">GLOBAL REACH</span>
+                  <span>BASE: INDIA</span>
+                  <span className="text-cdi-gold">ALL-INDIA DELIVERY</span>
                 </div>
               </div>
             </div>
@@ -236,16 +247,16 @@ export default function AboutPage() {
               </div>
             </div>
 
-            {/* Mandeep Kumar - CO - Founder / COO */}
+            {/* Mandeep - COO */}
             <div className="p-8 sm:p-10 rounded-3xl bg-gradient-to-b from-[#181818] via-[#121212] to-[#0A0A0A] border border-white/10 hover:border-cdi-gold/40 transition-all duration-300 shadow-2xl relative group flex flex-col justify-between">
               <div>
                 <div className="flex items-center gap-5 mb-6">
                   <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-cdi-gold via-cdi-gold-light to-cdi-gold-dark text-cdi-black font-extrabold font-display text-xl flex items-center justify-center shadow-lg shrink-0">
-                    MK
+                    M
                   </div>
                   <div>
                     <h3 className="text-2xl font-extrabold text-cdi-white font-display uppercase tracking-wide">
-                      Mandeep 
+                      {CDI_BRAND.coo.name}
                     </h3>
                     <p className="text-xs sm:text-sm font-mono text-cdi-gold font-medium mt-1">
                       COO — Chhichholiya Digital Industries

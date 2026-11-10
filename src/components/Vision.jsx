@@ -1,6 +1,7 @@
 import React from 'react';
 import { motion } from 'framer-motion';
-import { Sparkles, ArrowRight } from 'lucide-react';
+import { Sparkles } from 'lucide-react';
+import BrandLogo from './BrandLogo';
 
 export default function Vision({ onOpenProjectModal }) {
   return (
@@ -11,10 +12,10 @@ export default function Vision({ onOpenProjectModal }) {
 
       {/* Subtle Background Monogram Silhouette */}
       <div className="absolute inset-0 flex items-center justify-center opacity-[0.03] pointer-events-none">
-        <img
-          src={`${import.meta.env.BASE_URL}assets/cdi-logo.png`}
+        <BrandLogo
           alt=""
-          className="w-[800px] max-w-full object-contain filter grayscale"
+          loading="lazy"
+          className="w-[800px] max-w-full h-auto object-contain filter grayscale"
         />
       </div>
 

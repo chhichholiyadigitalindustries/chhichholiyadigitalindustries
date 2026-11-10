@@ -1,64 +1,54 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { 
-  Send, 
-  CheckCircle2, 
-  Sparkles, 
-  Mail, 
-  Phone, 
-  Building, 
-  User, 
-  MessageSquare,
-  AlertCircle
+import { Link } from 'react-router-dom';
+import {
+  Send,
+  CheckCircle2,
+  Mail,
+  Phone,
+  AlertCircle,
+  AlertTriangle,
+  MessageCircle,
 } from 'lucide-react';
-import confetti from 'canvas-confetti';
-
-const PROJECT_TYPES = [
-  'Website',
-  'Mobile App',
-  'AI Product',
-  'Business Software',
-  'UI/UX',
-  'Custom Technology',
-  'Other',
-];
+import { CDI_BRAND, getWhatsAppUrl } from '../config/brand';
+import {
+  INDUSTRY_OPTIONS,
+  SERVICE_OPTIONS,
+  BUDGET_OPTIONS,
+  validateEnquiryForm,
+  buildEnquiryLinks,
+  submitEnquiry,
+} from '../utils/enquirySubmit';
 
 export default function Contact({ preselectedService }) {
+  const resolveService = (svc) =>
+    SERVICE_OPTIONS.find((opt) => svc && opt.toLowerCase().includes(svc.toLowerCase())) ||
+    SERVICE_OPTIONS[0];
+
   const [formData, setFormData] = useState({
     name: '',
     email: '',
     phone: '',
     company: '',
-    projectType: preselectedService || 'Website',
-    message: '',
+    industry: INDUSTRY_OPTIONS[0],
+    service: resolveService(preselectedService),
+    budget: BUDGET_OPTIONS[1],
+    description: '',
+    consent: false,
+    websiteTrap: '',
   });
 
   const [errors, setErrors] = useState({});
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [isSubmitted, setIsSubmitted] = useState(false);
-  const [inquiryId, setInquiryId] = useState('');
-
-  const validate = () => {
-    const errs = {};
-    if (!formData.name.trim()) errs.name = 'Please enter your name.';
-    if (!formData.email.trim()) {
-      errs.email = 'Please enter your email.';
-    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
-      errs.email = 'Please enter a valid email address.';
-    }
-    if (!formData.phone.trim()) {
-      errs.phone = 'Please enter a contact number.';
-    }
-    if (!formData.message.trim()) {
-      errs.message = 'Please provide a brief overview of your project.';
-    }
-    setErrors(errs);
-    return Object.keys(errs).length === 0;
-  };
+  const [status, setStatus] = useState('idle');
+  const [statusMessage, setStatusMessage] = useState('');
+  const [submittedInfo, setSubmittedInfo] = useState(null);
 
   const handleChange = (e) => {
-    const { name, value } = e.target;
-    setFormData((prev) => ({ ...prev, [name]: value }));
+    const { name, value, type, checked } = e.target;
+    setFormData((prev) => ({
+      ...prev,
+      [name]: type === 'checkbox' ? checked : value,
+    }));
     if (errors[name]) {
       setErrors((prev) => ({ ...prev, [name]: null }));
     }
@@ -66,216 +56,191 @@ export default function Contact({ preselectedService }) {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!validate()) return;
-
-    setIsSubmitting(true);
-
-    const generatedId = `CDI-${Math.floor(100000 + Math.random() * 900000)}`;
-    setInquiryId(generatedId);
-
-    const emailSubject = `🚀 New Project Inquiry: ${formData.name} [${formData.projectType}] - Ref #${generatedId}`;
-
-    try {
-      // Direct FormSubmit backend delivery straight to chhichholiyadigitalindustries@gmail.com
-      await fetch("https://formsubmit.co/ajax/chhichholiyadigitalindustries@gmail.com", {
-        method: "POST",
-        headers: { 
-          'Content-Type': 'application/json',
-          'Accept': 'application/json'
-        },
-        body: JSON.stringify({
-          _subject: emailSubject,
-          _replyto: formData.email,
-          _captcha: "false",
-          _template: "table",
-          "Reference ID": generatedId,
-          "Client Name": formData.name,
-          "Client Email": formData.email,
-          "Client Phone": formData.phone,
-          "Company / Org": formData.company || "N/A",
-          "Project Type": formData.projectType,
-          "Project Scope & Requirements": formData.message,
-          "Submission Source": "CDI Official Corporate Portal"
-        })
-      });
-    } catch (err) {
-      console.warn('FormSubmit background notification error:', err);
+    const errs = validateEnquiryForm(formData);
+    if (Object.keys(errs).length > 0) {
+      setErrors(errs);
+      return;
     }
 
-    setIsSubmitting(false);
-    setIsSubmitted(true);
+    setStatus('sending');
+    const res = await submitEnquiry(formData, 'CDI Embedded Contact Section');
+    const links = buildEnquiryLinks(formData, res.inquiryId);
 
-    // Trigger celebratory gold confetti for client
-    try {
-      confetti({
-        particleCount: 90,
-        spread: 80,
-        origin: { y: 0.6 },
-        colors: ['#D6A33A', '#F2C45A', '#FFFFFF'],
-      });
-    } catch (err) {
-      // Fallback gracefully
+    setSubmittedInfo({
+      id: res.inquiryId,
+      data: { ...formData },
+      links,
+    });
+
+    if (res.delivered) {
+      setStatus('success');
+    } else {
+      setStatusMessage(res.reason);
+      setStatus('fallback');
     }
   };
 
   return (
-    <section id="contact" className="relative py-28 sm:py-36 bg-cdi-dark overflow-hidden border-t border-white/5">
-      {/* Background Precision Grid */}
+    <section id="contact" className="relative py-24 sm:py-32 bg-cdi-dark overflow-hidden border-t border-white/5">
       <div className="absolute inset-0 bg-tech-grid opacity-20 pointer-events-none" />
       <div className="absolute bottom-0 right-1/4 w-96 h-96 bg-cdi-gold/5 blur-[160px] rounded-full pointer-events-none" />
 
       <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        {/* Header */}
-        <div className="flex flex-col md:flex-row md:items-end justify-between mb-16 sm:mb-20 gap-6">
+        <div className="flex flex-col md:flex-row md:items-end justify-between mb-12 sm:mb-16 gap-6">
           <div>
             <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full border border-cdi-gold/30 bg-[#121212] text-[11px] font-mono tracking-widest text-cdi-gold uppercase mb-4">
-              <span>07 // Inquiries</span>
+              <span>// Project Enquiry</span>
             </div>
-            <h2 className="text-3xl sm:text-5xl md:text-6xl font-extrabold tracking-tight text-cdi-white font-display uppercase">
-              LET'S BUILD <span className="text-gold-gradient">SOMETHING.</span>
+            <h2 className="text-3xl sm:text-5xl font-extrabold tracking-tight text-cdi-white font-display uppercase">
+              DISCUSS YOUR <span className="text-gold-gradient">PROJECT.</span>
             </h2>
           </div>
           <p className="text-sm sm:text-base text-cdi-silver-muted max-w-md font-light leading-relaxed">
-            Submit your project requirements. Our engineering team reviews all technical inquiries directly.
+            Serving manufacturers, industrial businesses, retailers, and MSMEs across India.
           </p>
         </div>
 
-        {/* Contact Form & Architecture Card */}
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-start">
-          {/* Left Context Column */}
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 items-start">
           <div className="lg:col-span-5 space-y-6">
-            <div className="p-8 rounded-3xl bg-[#141414] border border-white/10 shadow-xl space-y-6">
-              <h3 className="text-xl font-bold text-cdi-white font-display">
-                ENGINEERING CONSULTATION
+            <div className="p-8 rounded-3xl bg-[#141414] border border-white/10 shadow-xl space-y-5">
+              <h3 className="text-xl font-bold text-cdi-white font-display uppercase">
+                Direct Consultation
               </h3>
               <p className="text-sm text-cdi-silver-muted leading-relaxed font-light">
-                Whether you need a full-scale web ecosystem, a native mobile application, custom AI agents, or an enterprise SaaS platform, we provide architectural clarity and transparent scoping.
+                Speak directly with our team about your business website, web portal, mobile app, billing software, or automation goals.
               </p>
 
-              {/* Official Direct Email Card */}
-              <div className="p-4 rounded-2xl bg-[#0D0D0D] border border-cdi-gold/30 flex flex-col gap-2">
+              <a
+                href={getWhatsAppUrl('Hello CDI Team, I would like to discuss a project for my business.')}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="p-4 rounded-2xl bg-[#0F1814] border border-emerald-500/35 hover:border-emerald-400 flex items-center gap-3 text-emerald-300 transition-colors"
+              >
+                <MessageCircle className="w-5 h-5 text-emerald-400 shrink-0" />
+                <div>
+                  <span className="text-[11px] font-mono uppercase tracking-wider block font-semibold">
+                    WhatsApp Business Chat
+                  </span>
+                  <span className="text-xs font-mono text-cdi-white">+91 7232076778</span>
+                </div>
+              </a>
+
+              <div className="p-4 rounded-2xl bg-[#0D0D0D] border border-white/10 space-y-2">
                 <span className="text-[11px] font-mono text-cdi-gold uppercase tracking-wider font-semibold flex items-center gap-1.5">
-                  <Mail className="w-3.5 h-3.5 text-cdi-gold" /> Official Project Mailbox
+                  <Phone className="w-3.5 h-3.5" /> Official Phone Numbers
+                </span>
+                <div className="flex flex-wrap gap-4 text-xs font-mono">
+                  {CDI_BRAND.phones.map((p) => (
+                    <a key={p.raw} href={p.tel} className="text-cdi-white hover:text-cdi-gold underline decoration-white/20 underline-offset-4">
+                      {p.display}
+                    </a>
+                  ))}
+                </div>
+              </div>
+
+              <div className="p-4 rounded-2xl bg-[#0D0D0D] border border-white/10 flex flex-col gap-1.5">
+                <span className="text-[11px] font-mono text-cdi-gold uppercase tracking-wider font-semibold flex items-center gap-1.5">
+                  <Mail className="w-3.5 h-3.5" /> Official Email
                 </span>
                 <a
-                  href="mailto:chhichholiyadigitalindustries@gmail.com"
-                  className="text-xs sm:text-sm font-mono text-cdi-white hover:text-cdi-gold font-medium break-all transition-colors underline decoration-cdi-gold/40 underline-offset-4"
+                  href={`mailto:${CDI_BRAND.email}`}
+                  className="text-xs font-mono text-cdi-white hover:text-cdi-gold break-all underline decoration-white/20 underline-offset-4"
                 >
-                  chhichholiyadigitalindustries@gmail.com
+                  {CDI_BRAND.email}
                 </a>
-              </div>
-
-              <div className="space-y-4 pt-2 border-t border-white/10">
-                <div className="flex items-center gap-3 text-sm text-cdi-silver">
-                  <div className="p-2 rounded-lg bg-[#1D1D1D] text-cdi-gold">
-                    <CheckCircle2 className="w-4 h-4" />
-                  </div>
-                  <span>Direct technical roadmap & feasibility review</span>
-                </div>
-                <div className="flex items-center gap-3 text-sm text-cdi-silver">
-                  <div className="p-2 rounded-lg bg-[#1D1D1D] text-cdi-gold">
-                    <CheckCircle2 className="w-4 h-4" />
-                  </div>
-                  <span>Strict NDA and IP protection standards</span>
-                </div>
-                <div className="flex items-center gap-3 text-sm text-cdi-silver">
-                  <div className="p-2 rounded-lg bg-[#1D1D1D] text-cdi-gold">
-                    <CheckCircle2 className="w-4 h-4" />
-                  </div>
-                  <span>End-to-end milestone-based delivery</span>
-                </div>
-              </div>
-
-              <div className="p-4 rounded-2xl bg-[#0D0D0D] border border-white/5 font-mono text-xs text-cdi-silver-muted">
-                <span className="text-cdi-gold block font-semibold mb-1">// RESPONSE PROTOCOL</span>
-                All inquiries sent to <span className="text-cdi-silver font-medium">chhichholiyadigitalindustries@gmail.com</span> receive an evaluation within 24 hours.
               </div>
             </div>
           </div>
 
-          {/* Right Form Column */}
           <div className="lg:col-span-7">
             <div className="p-8 sm:p-10 rounded-3xl bg-[#141414] border border-white/10 shadow-2xl relative">
               <AnimatePresence mode="wait">
-                {isSubmitted ? (
+                {status === 'success' && submittedInfo ? (
                   <motion.div
                     key="submitted"
-                    initial={{ opacity: 0, scale: 0.95 }}
+                    initial={{ opacity: 0, scale: 0.96 }}
                     animate={{ opacity: 1, scale: 1 }}
-                    exit={{ opacity: 0 }}
-                    className="py-12 text-center flex flex-col items-center justify-center space-y-6"
+                    className="py-10 text-center flex flex-col items-center space-y-5"
                   >
-                    <div className="w-16 h-16 rounded-full bg-cdi-gold/20 border border-cdi-gold flex items-center justify-center text-cdi-gold shadow-[0_0_30px_rgba(214,163,58,0.4)]">
-                      <CheckCircle2 className="w-8 h-8" />
-                    </div>
-
+                    <CheckCircle2 className="w-12 h-12 text-emerald-400" />
                     <div>
                       <span className="text-xs font-mono uppercase tracking-widest text-cdi-gold block mb-1">
-                        Inquiry Submitted Successfully // Ref: {inquiryId}
+                        Delivered // Ref: {submittedInfo.id}
                       </span>
-                      <h4 className="text-2xl sm:text-3xl font-bold text-cdi-white font-display">
-                        Thank You, {formData.name}!
+                      <h4 className="text-2xl font-bold text-cdi-white font-display">
+                        Thank You, {submittedInfo.data.name}!
                       </h4>
-                      <p className="text-sm text-cdi-silver-muted max-w-md mx-auto mt-2 font-light leading-relaxed">
-                        Your project details have been successfully received and delivered to our engineering team. We will review your scope and get in touch with you shortly at <span className="text-cdi-white font-medium">{formData.email}</span> / <span className="text-cdi-white font-medium">{formData.phone}</span>.
+                      <p className="text-sm text-cdi-silver-muted max-w-md mx-auto mt-2">
+                        Your enquiry has been sent to {CDI_BRAND.email}. We will follow up on {submittedInfo.data.phone}.
                       </p>
                     </div>
-
-                    <div className="p-4 rounded-2xl bg-[#0D0D0D] border border-white/5 w-full max-w-md text-left text-xs font-mono space-y-1.5 text-cdi-silver-muted">
-                      <div className="text-cdi-gold font-semibold mb-1">// SUBMISSION SUMMARY</div>
-                      <div>• Name: <span className="text-cdi-white">{formData.name}</span></div>
-                      <div>• Service: <span className="text-cdi-white">{formData.projectType}</span></div>
-                      <div>• Phone: <span className="text-cdi-white">{formData.phone}</span></div>
-                      <div>• Company: <span className="text-cdi-white">{formData.company || 'Not Specified'}</span></div>
-                    </div>
-
-                    <div className="pt-2">
-                      <button
-                        onClick={() => {
-                          setIsSubmitted(false);
-                          setFormData({
-                            name: '',
-                            email: '',
-                            phone: '',
-                            company: '',
-                            projectType: 'Website',
-                            message: '',
-                          });
-                        }}
-                        className="px-8 py-3 rounded-full bg-gradient-to-r from-cdi-gold to-cdi-gold-light text-cdi-black text-xs font-bold font-mono uppercase tracking-wider hover:shadow-[0_0_20px_rgba(214,163,58,0.4)] transition-all"
-                      >
-                        Submit Another Inquiry
-                      </button>
-                    </div>
+                    <button
+                      onClick={() => setStatus('idle')}
+                      className="px-6 py-2.5 rounded-full bg-cdi-gold text-cdi-black text-xs font-bold font-mono uppercase"
+                    >
+                      Send Another Enquiry
+                    </button>
                   </motion.div>
-                ) : (
-                  <motion.form
-                    key="form"
-                    onSubmit={handleSubmit}
+                ) : status === 'fallback' && submittedInfo ? (
+                  <motion.div
+                    key="fallback"
                     initial={{ opacity: 0 }}
                     animate={{ opacity: 1 }}
-                    exit={{ opacity: 0 }}
-                    className="space-y-5"
-                    noValidate
+                    className="py-6 space-y-5"
                   >
-                    {/* Name & Email Row */}
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
+                    <div className="p-4 rounded-2xl bg-amber-500/10 border border-amber-500/35 flex items-start gap-3">
+                      <AlertTriangle className="w-5 h-5 text-amber-400 shrink-0 mt-0.5" />
+                      <p className="text-xs text-cdi-silver leading-relaxed">
+                        {statusMessage} Send your pre-filled enquiry directly using WhatsApp or Email below (Ref: {submittedInfo.id}).
+                      </p>
+                    </div>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                      <a
+                        href={submittedInfo.links.whatsappUrl}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="py-3.5 px-5 rounded-xl bg-emerald-500 text-black font-bold text-xs uppercase flex items-center justify-center gap-2"
+                      >
+                        <MessageCircle className="w-4 h-4" />
+                        <span>Send via WhatsApp</span>
+                      </a>
+                      <a
+                        href={submittedInfo.links.mailtoUrl}
+                        className="py-3.5 px-5 rounded-xl bg-cdi-gold text-black font-bold text-xs uppercase flex items-center justify-center gap-2"
+                      >
+                        <Mail className="w-4 h-4" />
+                        <span>Send via Email App</span>
+                      </a>
+                    </div>
+                    <button onClick={() => setStatus('idle')} className="text-xs font-mono text-cdi-silver-muted underline">
+                      ← Back to Form
+                    </button>
+                  </motion.div>
+                ) : (
+                  <motion.form key="form" onSubmit={handleSubmit} className="space-y-4" noValidate>
+                    <input
+                      type="text"
+                      name="websiteTrap"
+                      value={formData.websiteTrap}
+                      onChange={handleChange}
+                      className="hidden"
+                      tabIndex={-1}
+                      autoComplete="off"
+                    />
+
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                       <div>
-                        <label className="block text-xs font-mono uppercase tracking-wider text-cdi-silver mb-2">
-                          Your Name <span className="text-cdi-gold">*</span>
+                        <label className="block text-xs font-mono uppercase tracking-wider text-cdi-silver mb-1.5">
+                          Your Name *
                         </label>
-                        <div className="relative">
-                          <input
-                            type="text"
-                            name="name"
-                            value={formData.name}
-                            onChange={handleChange}
-                            placeholder="e.g. Abhishek Sharma"
-                            className={`w-full px-4 py-3.5 rounded-xl bg-[#0D0D0D] border ${
-                              errors.name ? 'border-red-500/80 focus:ring-red-500' : 'border-white/10 focus:border-cdi-gold'
-                            } text-cdi-white text-sm placeholder:text-white/20 focus:outline-none focus:ring-1 focus:ring-cdi-gold transition-all`}
-                          />
-                        </div>
+                        <input
+                          type="text"
+                          name="name"
+                          value={formData.name}
+                          onChange={handleChange}
+                          placeholder="Full Name"
+                          className="w-full px-4 py-3 rounded-xl bg-[#0D0D0D] border border-white/10 text-cdi-white text-sm focus:outline-none focus:border-cdi-gold"
+                        />
                         {errors.name && (
                           <span className="text-[11px] text-red-400 mt-1 flex items-center gap-1">
                             <AlertCircle className="w-3 h-3" /> {errors.name}
@@ -284,34 +249,43 @@ export default function Contact({ preselectedService }) {
                       </div>
 
                       <div>
-                        <label className="block text-xs font-mono uppercase tracking-wider text-cdi-silver mb-2">
-                          Work Email <span className="text-cdi-gold">*</span>
+                        <label className="block text-xs font-mono uppercase tracking-wider text-cdi-silver mb-1.5">
+                          Company / Business
                         </label>
-                        <div className="relative">
-                          <input
-                            type="email"
-                            name="email"
-                            value={formData.email}
-                            onChange={handleChange}
-                            placeholder="abhishek@company.com"
-                            className={`w-full px-4 py-3.5 rounded-xl bg-[#0D0D0D] border ${
-                              errors.email ? 'border-red-500/80 focus:ring-red-500' : 'border-white/10 focus:border-cdi-gold'
-                            } text-cdi-white text-sm placeholder:text-white/20 focus:outline-none focus:ring-1 focus:ring-cdi-gold transition-all`}
-                          />
-                        </div>
+                        <input
+                          type="text"
+                          name="company"
+                          value={formData.company}
+                          onChange={handleChange}
+                          placeholder="Business Name"
+                          className="w-full px-4 py-3 rounded-xl bg-[#0D0D0D] border border-white/10 text-cdi-white text-sm focus:outline-none focus:border-cdi-gold"
+                        />
+                      </div>
+                    </div>
+
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                      <div>
+                        <label className="block text-xs font-mono uppercase tracking-wider text-cdi-silver mb-1.5">
+                          Email Address *
+                        </label>
+                        <input
+                          type="email"
+                          name="email"
+                          value={formData.email}
+                          onChange={handleChange}
+                          placeholder="you@company.com"
+                          className="w-full px-4 py-3 rounded-xl bg-[#0D0D0D] border border-white/10 text-cdi-white text-sm focus:outline-none focus:border-cdi-gold"
+                        />
                         {errors.email && (
                           <span className="text-[11px] text-red-400 mt-1 flex items-center gap-1">
                             <AlertCircle className="w-3 h-3" /> {errors.email}
                           </span>
                         )}
                       </div>
-                    </div>
 
-                    {/* Phone & Company Row */}
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
                       <div>
-                        <label className="block text-xs font-mono uppercase tracking-wider text-cdi-silver mb-2">
-                          Phone Number <span className="text-cdi-gold">*</span>
+                        <label className="block text-xs font-mono uppercase tracking-wider text-cdi-silver mb-1.5">
+                          Phone Number *
                         </label>
                         <input
                           type="tel"
@@ -319,9 +293,7 @@ export default function Contact({ preselectedService }) {
                           value={formData.phone}
                           onChange={handleChange}
                           placeholder="+91 98765 43210"
-                          className={`w-full px-4 py-3.5 rounded-xl bg-[#0D0D0D] border ${
-                            errors.phone ? 'border-red-500/80 focus:ring-red-500' : 'border-white/10 focus:border-cdi-gold'
-                          } text-cdi-white text-sm placeholder:text-white/20 focus:outline-none focus:ring-1 focus:ring-cdi-gold transition-all`}
+                          className="w-full px-4 py-3 rounded-xl bg-[#0D0D0D] border border-white/10 text-cdi-white text-sm focus:outline-none focus:border-cdi-gold"
                         />
                         {errors.phone && (
                           <span className="text-[11px] text-red-400 mt-1 flex items-center gap-1">
@@ -329,83 +301,112 @@ export default function Contact({ preselectedService }) {
                           </span>
                         )}
                       </div>
+                    </div>
+
+                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                      <div>
+                        <label className="block text-xs font-mono uppercase tracking-wider text-cdi-silver mb-1.5">
+                          Industry
+                        </label>
+                        <select
+                          name="industry"
+                          value={formData.industry}
+                          onChange={handleChange}
+                          className="w-full px-3 py-3 rounded-xl bg-[#0D0D0D] border border-white/10 text-cdi-white text-xs focus:outline-none focus:border-cdi-gold"
+                        >
+                          {INDUSTRY_OPTIONS.map((ind) => (
+                            <option key={ind} value={ind} className="bg-[#121212]">
+                              {ind}
+                            </option>
+                          ))}
+                        </select>
+                      </div>
 
                       <div>
-                        <label className="block text-xs font-mono uppercase tracking-wider text-cdi-silver mb-2">
-                          Company / Organization
+                        <label className="block text-xs font-mono uppercase tracking-wider text-cdi-silver mb-1.5">
+                          Service *
                         </label>
-                        <input
-                          type="text"
-                          name="company"
-                          value={formData.company}
+                        <select
+                          name="service"
+                          value={formData.service}
                           onChange={handleChange}
-                          placeholder="e.g. Enterprises Ltd."
-                          className="w-full px-4 py-3.5 rounded-xl bg-[#0D0D0D] border border-white/10 text-cdi-white text-sm placeholder:text-white/20 focus:outline-none focus:border-cdi-gold focus:ring-1 focus:ring-cdi-gold transition-all"
-                        />
+                          className="w-full px-3 py-3 rounded-xl bg-[#0D0D0D] border border-white/10 text-cdi-white text-xs focus:outline-none focus:border-cdi-gold"
+                        >
+                          {SERVICE_OPTIONS.map((svc) => (
+                            <option key={svc} value={svc} className="bg-[#121212]">
+                              {svc}
+                            </option>
+                          ))}
+                        </select>
+                      </div>
+
+                      <div>
+                        <label className="block text-xs font-mono uppercase tracking-wider text-cdi-silver mb-1.5">
+                          Budget
+                        </label>
+                        <select
+                          name="budget"
+                          value={formData.budget}
+                          onChange={handleChange}
+                          className="w-full px-3 py-3 rounded-xl bg-[#0D0D0D] border border-white/10 text-cdi-white text-xs focus:outline-none focus:border-cdi-gold"
+                        >
+                          {BUDGET_OPTIONS.map((b) => (
+                            <option key={b} value={b} className="bg-[#121212]">
+                              {b}
+                            </option>
+                          ))}
+                        </select>
                       </div>
                     </div>
 
-                    {/* Project Type Dropdown */}
                     <div>
-                      <label className="block text-xs font-mono uppercase tracking-wider text-cdi-silver mb-2">
-                        Project Type <span className="text-cdi-gold">*</span>
-                      </label>
-                      <select
-                        name="projectType"
-                        value={formData.projectType}
-                        onChange={handleChange}
-                        className="w-full px-4 py-3.5 rounded-xl bg-[#0D0D0D] border border-white/10 text-cdi-white text-sm focus:outline-none focus:border-cdi-gold focus:ring-1 focus:ring-cdi-gold transition-all cursor-pointer"
-                      >
-                        {PROJECT_TYPES.map((type) => (
-                          <option key={type} value={type} className="bg-[#121212] text-cdi-white">
-                            {type}
-                          </option>
-                        ))}
-                      </select>
-                    </div>
-
-                    {/* Message Area */}
-                    <div>
-                      <label className="block text-xs font-mono uppercase tracking-wider text-cdi-silver mb-2">
-                        Project Description & Scope <span className="text-cdi-gold">*</span>
+                      <label className="block text-xs font-mono uppercase tracking-wider text-cdi-silver mb-1.5">
+                        Project Description *
                       </label>
                       <textarea
-                        name="message"
+                        name="description"
                         rows={4}
-                        value={formData.message}
+                        value={formData.description}
                         onChange={handleChange}
-                        placeholder="Describe your requirements, timeline, core features or objectives..."
-                        className={`w-full px-4 py-3.5 rounded-xl bg-[#0D0D0D] border ${
-                          errors.message ? 'border-red-500/80 focus:ring-red-500' : 'border-white/10 focus:border-cdi-gold'
-                        } text-cdi-white text-sm placeholder:text-white/20 focus:outline-none focus:ring-1 focus:ring-cdi-gold transition-all resize-none`}
+                        placeholder="Describe your requirements..."
+                        className="w-full px-4 py-3 rounded-xl bg-[#0D0D0D] border border-white/10 text-cdi-white text-sm focus:outline-none focus:border-cdi-gold resize-none"
                       />
-                      {errors.message && (
+                      {errors.description && (
                         <span className="text-[11px] text-red-400 mt-1 flex items-center gap-1">
-                          <AlertCircle className="w-3 h-3" /> {errors.message}
+                          <AlertCircle className="w-3 h-3" /> {errors.description}
                         </span>
                       )}
                     </div>
 
-                    {/* Submit Button */}
-                    <div className="pt-2">
-                      <button
-                        type="submit"
-                        disabled={isSubmitting}
-                        className="w-full py-4 px-8 rounded-xl bg-gradient-to-r from-cdi-gold via-cdi-gold-light to-cdi-gold text-cdi-black font-bold uppercase tracking-wider text-xs sm:text-sm flex items-center justify-center gap-3 shadow-[0_0_25px_rgba(214,163,58,0.4)] hover:shadow-[0_0_35px_rgba(214,163,58,0.6)] transition-all disabled:opacity-50"
-                      >
-                        {isSubmitting ? (
-                          <>
-                            <span className="w-4 h-4 rounded-full border-2 border-cdi-black border-t-transparent animate-spin" />
-                            <span>Processing Transmission...</span>
-                          </>
-                        ) : (
-                          <>
-                            <Send className="w-4 h-4" />
-                            <span>Send Project Inquiry</span>
-                          </>
-                        )}
-                      </button>
+                    <div>
+                      <label className="flex items-start gap-2.5 text-xs text-cdi-silver-muted cursor-pointer">
+                        <input
+                          type="checkbox"
+                          name="consent"
+                          checked={formData.consent}
+                          onChange={handleChange}
+                          className="mt-0.5 rounded border-white/20 bg-[#0D0D0D] text-cdi-gold"
+                        />
+                        <span>
+                          I consent to CDI using these details to respond to my enquiry per the{' '}
+                          <Link to="/privacy" className="text-cdi-gold underline">
+                            Privacy Policy
+                          </Link>.
+                        </span>
+                      </label>
+                      {errors.consent && (
+                        <span className="text-[11px] text-red-400 mt-1 block">{errors.consent}</span>
+                      )}
                     </div>
+
+                    <button
+                      type="submit"
+                      disabled={status === 'sending'}
+                      className="w-full py-4 px-8 rounded-xl bg-gradient-to-r from-cdi-gold via-cdi-gold-light to-cdi-gold text-cdi-black font-bold uppercase tracking-wider text-xs flex items-center justify-center gap-2 shadow-[0_0_25px_rgba(214,163,58,0.4)] disabled:opacity-50"
+                    >
+                      <Send className="w-4 h-4" />
+                      <span>{status === 'sending' ? 'Verifying & Sending...' : 'Send Project Enquiry'}</span>
+                    </button>
                   </motion.form>
                 )}
               </AnimatePresence>

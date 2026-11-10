@@ -2,10 +2,17 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import { Sparkles, ArrowLeft, Home, Terminal } from 'lucide-react';
 import PageHeader from '../components/PageHeader';
+import SeoHead from '../components/SeoHead';
 
 export default function NotFoundPage() {
   return (
     <div className="overflow-hidden bg-cdi-black text-cdi-white">
+      <SeoHead
+        route="/404"
+        title="404 — Page Not Found | Chhichholiya Digital Industries (CDI)"
+        description="The requested page could not be found on the Chhichholiya Digital Industries website."
+        noindex={true}
+      />
       <PageHeader
         eyebrow="ERROR 404 // ROUTE NOT FOUND"
         title="PAGE DOES NOT"

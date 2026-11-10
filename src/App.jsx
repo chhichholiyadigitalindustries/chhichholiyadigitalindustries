@@ -1,76 +1,103 @@
-import React, { useState } from 'react';
-import { BrowserRouter, Routes, Route } from 'react-router-dom';
-import CustomCursor from './components/CustomCursor';
+import React, { useState, Suspense, lazy } from 'react';
+import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import ScrollToTop from './components/ScrollToTop';
 import Navbar from './components/Navbar';
 import Footer from './components/Footer';
-import ProjectModal from './components/ProjectModal';
-
-// Pages
 import Home from './pages/Home';
-import AboutPage from './pages/AboutPage';
-import ServicesPage from './pages/ServicesPage';
-import ProductsPage from './pages/ProductsPage';
-import TechnologyPage from './pages/TechnologyPage';
-import IndustriesPage from './pages/IndustriesPage';
-import EngineeringPage from './pages/EngineeringPage';
-import InsightsPage from './pages/InsightsPage';
-import ContactPage from './pages/ContactPage';
-import WorkPage from './pages/WorkPage';
-import PrivacyPage from './pages/PrivacyPage';
-import TermsPage from './pages/TermsPage';
-import NotFoundPage from './pages/NotFoundPage';
+import { SEO_LANDING_PAGES } from './data/seoLandingPages';
+
+// Lazy-loaded interior pages, modals, and non-critical desktop cursor for fast LCP
+const CustomCursor = lazy(() => import('./components/CustomCursor'));
+const ProjectModal = lazy(() => import('./components/ProjectModal'));
+const AboutPage = lazy(() => import('./pages/AboutPage'));
+const ServicesPage = lazy(() => import('./pages/ServicesPage'));
+const ProductsPage = lazy(() => import('./pages/ProductsPage'));
+const TechnologyPage = lazy(() => import('./pages/TechnologyPage'));
+const IndustriesPage = lazy(() => import('./pages/IndustriesPage'));
+const EngineeringPage = lazy(() => import('./pages/EngineeringPage'));
+const InsightsPage = lazy(() => import('./pages/InsightsPage'));
+const ArticlePage = lazy(() => import('./pages/ArticlePage'));
+const ContactPage = lazy(() => import('./pages/ContactPage'));
+const WorkPage = lazy(() => import('./pages/WorkPage'));
+const PrivacyPage = lazy(() => import('./pages/PrivacyPage'));
+const TermsPage = lazy(() => import('./pages/TermsPage'));
+const NotFoundPage = lazy(() => import('./pages/NotFoundPage'));
+const ServiceLandingPage = lazy(() => import('./pages/ServiceLandingPage'));
+
+function PageFallback() {
+  return (
+    <div className="min-h-[60vh] flex items-center justify-center bg-cdi-black">
+      <div className="w-8 h-8 rounded-full border-2 border-cdi-gold border-t-transparent animate-spin" aria-label="Loading page" />
+    </div>
+  );
+}
 
 export default function App() {
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [selectedService, setSelectedService] = useState('Web Engineering');
+  const [selectedService, setSelectedService] = useState('Business Website Development');
 
   const handleOpenModalWithService = (serviceName) => {
-    setSelectedService(serviceName || 'Web Engineering');
+    setSelectedService(serviceName || 'Business Website Development');
     setIsModalOpen(true);
   };
 
   return (
     <BrowserRouter basename={import.meta.env.BASE_URL}>
       <div className="relative bg-cdi-black text-cdi-white min-h-screen selection:bg-cdi-gold selection:text-cdi-black flex flex-col justify-between">
-        {/* Scroll Reset on route change */}
         <ScrollToTop />
 
-        {/* Desktop Custom Tracking Cursor */}
-        <CustomCursor />
+        <Suspense fallback={null}>
+          <CustomCursor />
+        </Suspense>
 
-        {/* Global Sticky Header */}
-        <Navbar onOpenProjectModal={() => handleOpenModalWithService('Web Engineering')} />
+        <Navbar onOpenProjectModal={() => handleOpenModalWithService('Business Website Development')} />
 
-        {/* Main Routed Page Content */}
         <main className="flex-grow">
-          <Routes>
-            <Route path="/" element={<Home onOpenProjectModal={() => handleOpenModalWithService('Web Engineering')} />} />
-            <Route path="/about" element={<AboutPage />} />
-            <Route path="/services" element={<ServicesPage />} />
-            <Route path="/products" element={<ProductsPage />} />
-            <Route path="/technology" element={<TechnologyPage />} />
-            <Route path="/industries" element={<IndustriesPage />} />
-            <Route path="/engineering" element={<EngineeringPage />} />
-            <Route path="/work" element={<WorkPage onOpenProjectModal={handleOpenModalWithService} />} />
-            <Route path="/gallery" element={<WorkPage onOpenProjectModal={handleOpenModalWithService} />} />
-            <Route path="/insights" element={<InsightsPage />} />
-            <Route path="/contact" element={<ContactPage />} />
-            <Route path="/privacy" element={<PrivacyPage />} />
-            <Route path="/terms" element={<TermsPage />} />
-            <Route path="*" element={<NotFoundPage />} />
-          </Routes>
+          <Suspense fallback={<PageFallback />}>
+            <Routes>
+              <Route
+                path="/"
+                element={<Home onOpenProjectModal={() => handleOpenModalWithService('Business Website Development')} />}
+              />
+              <Route path="/about" element={<AboutPage />} />
+              <Route path="/services" element={<ServicesPage />} />
+              <Route path="/products" element={<ProductsPage />} />
+              <Route path="/technology" element={<TechnologyPage />} />
+              <Route path="/industries" element={<IndustriesPage />} />
+              <Route path="/engineering" element={<EngineeringPage />} />
+              <Route path="/work" element={<WorkPage onOpenProjectModal={handleOpenModalWithService} />} />
+              <Route path="/gallery" element={<Navigate to="/work" replace />} />
+              <Route path="/insights" element={<InsightsPage />} />
+              <Route path="/insights/:slug" element={<ArticlePage />} />
+              <Route path="/contact" element={<ContactPage />} />
+              <Route path="/privacy" element={<PrivacyPage />} />
+              <Route path="/terms" element={<TermsPage />} />
+
+              {/* Dedicated All-India SEO Landing Pages */}
+              {SEO_LANDING_PAGES.map((page) => (
+                <Route
+                  key={page.slug}
+                  path={page.route}
+                  element={<ServiceLandingPage page={page} />}
+                />
+              ))}
+
+              <Route path="*" element={<NotFoundPage />} />
+            </Routes>
+          </Suspense>
         </main>
 
-        {/* Global Footer */}
         <Footer />
 
-        {/* Quick Project Spec Modal */}
-        <ProjectModal
-          isOpen={isModalOpen}
-          onClose={() => setIsModalOpen(false)}
-          defaultService={selectedService}
-        />
+        {isModalOpen && (
+          <Suspense fallback={null}>
+            <ProjectModal
+              isOpen={isModalOpen}
+              onClose={() => setIsModalOpen(false)}
+              defaultService={selectedService}
+            />
+          </Suspense>
+        )}
       </div>
     </BrowserRouter>
   );

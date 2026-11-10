@@ -1,6 +1,7 @@
 import React from 'react';
 import { motion } from 'framer-motion';
 import { ArrowRight, Sparkles, MessageSquare } from 'lucide-react';
+import BrandLogo from './BrandLogo';
 
 export default function CTA({ onOpenProjectModal }) {
   const handleContactClick = (e) => {
@@ -15,13 +16,17 @@ export default function CTA({ onOpenProjectModal }) {
     <section className="relative py-28 sm:py-36 bg-cdi-black overflow-hidden border-t border-white/5">
       {/* Background Animated Monogram Watermark */}
       <div className="absolute inset-0 flex items-center justify-center opacity-5 pointer-events-none">
-        <motion.img
-          src={`${import.meta.env.BASE_URL}assets/cdi-logo.png`}
-          alt=""
-          className="w-[700px] max-w-full object-contain filter drop-shadow-[0_0_50px_#D6A33A]"
+        <motion.div
+          className="w-[700px] max-w-full"
           animate={{ scale: [1, 1.05, 1], opacity: [0.04, 0.08, 0.04] }}
           transition={{ duration: 8, repeat: Infinity, ease: 'easeInOut' }}
-        />
+        >
+          <BrandLogo
+            alt=""
+            loading="lazy"
+            className="w-full h-auto object-contain filter drop-shadow-[0_0_50px_#D6A33A]"
+          />
+        </motion.div>
       </div>
 
       {/* Radial Gold Glow */}

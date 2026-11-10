@@ -8,6 +8,9 @@ import {
   Briefcase, 
   Film, 
   Rocket, 
+  Factory,
+  Cog,
+  Truck,
   ArrowRight, 
   ArrowUpRight, 
   Sparkles, 
@@ -17,10 +20,51 @@ import {
   Cpu 
 } from 'lucide-react';
 import PageHeader from '../components/PageHeader';
+import SeoHead from '../components/SeoHead';
+import { CORE_SEO_PAGES } from '../data/seoConfig';
 
 const INDUSTRIES_DATA = [
   {
     num: '01',
+    title: 'Manufacturing & Factories',
+    tag: 'INDUSTRIAL & OEM PRODUCTION',
+    icon: Factory,
+    desc: 'Modern B2B websites, searchable digital product catalogues, and dealer enquiry portals engineered for Indian manufacturing units and OEM suppliers.',
+    solutions: [
+      'Digital product catalogues replacing heavy PDFs',
+      'Factory capability & quality-control showcase pages',
+      'Bulk order & OEM Request-for-Quote (RFQ) forms',
+      'Pan-India dealer and distributor enquiry portals'
+    ]
+  },
+  {
+    num: '02',
+    title: 'Industrial Suppliers & Fabrication',
+    tag: 'B2B ENGINEERING & JOB-WORK',
+    icon: Cog,
+    desc: 'Purpose-built websites and quoting portals for machinery suppliers, CNC workshops, fabrication units, and industrial equipment vendors.',
+    solutions: [
+      'Technical dimension, grade & tolerance specification tables',
+      'Workshop machinery & production capacity documentation',
+      'Instant WhatsApp & email specification sharing',
+      'Job-card tracking and internal production logs'
+    ]
+  },
+  {
+    num: '03',
+    title: 'Distributors & Wholesalers',
+    tag: 'SUPPLY CHAIN & B2B COMMERCE',
+    icon: Truck,
+    desc: 'Custom B2B ordering portals, multi-warehouse stock tracking, and dealer-wise billing platforms for Indian wholesalers and distributors.',
+    solutions: [
+      'Dealer login portals for bulk order placement',
+      'Multi-godown inventory and dispatch visibility',
+      'Tiered pricing and GST-compliant invoice generation',
+      'Automated receivable reminders and customer ledgers'
+    ]
+  },
+  {
+    num: '04',
     title: 'Retail & MSME',
     tag: 'COMMERCE & RETAIL',
     icon: Store,
@@ -33,7 +77,7 @@ const INDUSTRIES_DATA = [
     ]
   },
   {
-    num: '02',
+    num: '05',
     title: 'Healthcare',
     tag: 'HEALTHCARE & CLINICAL SYSTEMS',
     icon: HeartPulse,
@@ -42,11 +86,11 @@ const INDUSTRIES_DATA = [
       'Patient scheduling and appointment management portals',
       'Secure digital medical records and prescription archives',
       'Clinical operations dashboards and billing workflows',
-      'Telehealth and patient communication interfaces'
+      'Patient notification and diagnostic report portals'
     ]
   },
   {
-    num: '03',
+    num: '06',
     title: 'Education',
     tag: 'EDTECH & LEARNING SYSTEMS',
     icon: GraduationCap,
@@ -59,7 +103,7 @@ const INDUSTRIES_DATA = [
     ]
   },
   {
-    num: '04',
+    num: '07',
     title: 'Business Services',
     tag: 'PROFESSIONAL SERVICES',
     icon: Briefcase,
@@ -72,7 +116,7 @@ const INDUSTRIES_DATA = [
     ]
   },
   {
-    num: '05',
+    num: '08',
     title: 'Media & Creative',
     tag: 'CONTENT & DIGITAL MEDIA',
     icon: Film,
@@ -80,28 +124,36 @@ const INDUSTRIES_DATA = [
     solutions: [
       'High-performance editorial and publishing web platforms',
       'Digital asset management and media distribution portals',
-      'Creative portfolio systems with rich interactive visual design',
+      'Creative portfolio systems with clean interactive design',
       'Audience analytics and subscription management tools'
     ]
   },
   {
-    num: '06',
-    title: 'Emerging Businesses',
-    tag: 'STARTUPS & VENTURES',
+    num: '09',
+    title: 'Startups & Ventures',
+    tag: 'EMERGING BUSINESSES',
     icon: Rocket,
     desc: 'Technology for startups, founders and new digital ventures needing rapid, modular MVP development and scalable architectures.',
     solutions: [
       'Fast-to-market Minimum Viable Product (MVP) engineering',
       'Full-stack prototype development (Web + Android)',
-      'Cloud backend architecture built to scale on demand',
+      'Cloud backend architecture built to scale cleanly',
       'AI feature integration and modern API infrastructure'
     ]
   }
 ];
 
 export default function IndustriesPage() {
+  const seo = CORE_SEO_PAGES['/industries'];
+
   return (
     <div className="overflow-hidden bg-cdi-black text-cdi-white">
+      <SeoHead
+        route={seo.route}
+        title={seo.title}
+        description={seo.description}
+        breadcrumbs={seo.breadcrumbs}
+      />
       {/* 1. Page Header */}
       <PageHeader
         eyebrow="DOMAINS // REAL-WORLD APPLIED TECHNOLOGY"

@@ -1,14 +1,25 @@
 import React, { useEffect, useRef } from 'react';
 import { motion } from 'framer-motion';
 import { Link } from 'react-router-dom';
-import { ArrowRight, ChevronDown, Layers, Cpu, Globe, Terminal, Sparkles, ArrowUpRight } from 'lucide-react';
+import {
+  ArrowRight,
+  Layers,
+  Cpu,
+  Globe,
+  Terminal,
+  MessageCircle,
+  MapPin,
+} from 'lucide-react';
+import { getWhatsAppUrl } from '../config/brand';
 
-export default function Hero({ onOpenProjectModal }) {
+export default function Hero() {
   const canvasRef = useRef(null);
 
   useEffect(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
 
@@ -20,22 +31,23 @@ export default function Hero({ onOpenProjectModal }) {
       width = canvas.width = window.innerWidth;
       height = canvas.height = window.innerHeight;
     };
-    window.addEventListener('resize', handleResize);
+    window.addEventListener('resize', handleResize, { passive: true });
 
-    // Node & particle system
-    const particleCount = Math.min(Math.floor(window.innerWidth / 18), 75);
+    // Lighter particle count on mobile for faster INP and lower battery drain
+    const isMobile = window.innerWidth < 768;
+    const particleCount = isMobile ? 24 : Math.min(Math.floor(window.innerWidth / 24), 55);
     const particles = [];
-    const mouse = { x: null, y: null, radius: 140 };
+    const mouse = { x: null, y: null, radius: 130 };
 
     for (let i = 0; i < particleCount; i++) {
       particles.push({
         x: Math.random() * width,
         y: Math.random() * height,
-        vx: (Math.random() - 0.5) * 0.45,
-        vy: (Math.random() - 0.5) * 0.45,
-        radius: Math.random() * 1.8 + 1,
-        color: Math.random() > 0.85 ? '#D6A33A' : '#A3A3A3',
-        alpha: Math.random() * 0.5 + 0.2,
+        vx: (Math.random() - 0.5) * 0.4,
+        vy: (Math.random() - 0.5) * 0.4,
+        radius: Math.random() * 1.6 + 0.9,
+        color: Math.random() > 0.82 ? '#D6A33A' : '#A3A3A3',
+        alpha: Math.random() * 0.45 + 0.2,
       });
     }
 
@@ -48,30 +60,19 @@ export default function Hero({ onOpenProjectModal }) {
       mouse.y = null;
     };
 
-    window.addEventListener('mousemove', handleMouseMove);
-    window.addEventListener('mouseleave', handleMouseLeave);
+    if (!isMobile) {
+      window.addEventListener('mousemove', handleMouseMove, { passive: true });
+      window.addEventListener('mouseleave', handleMouseLeave);
+    }
 
     const animate = () => {
+      if (document.visibilityState === 'hidden') {
+        animationFrameId = requestAnimationFrame(animate);
+        return;
+      }
+
       ctx.clearRect(0, 0, width, height);
 
-      // Draw subtle grid lines
-      ctx.strokeStyle = 'rgba(255, 255, 255, 0.02)';
-      ctx.lineWidth = 1;
-      const gridSize = 60;
-      for (let x = 0; x < width; x += gridSize) {
-        ctx.beginPath();
-        ctx.moveTo(x, 0);
-        ctx.lineTo(x, height);
-        ctx.stroke();
-      }
-      for (let y = 0; y < height; y += gridSize) {
-        ctx.beginPath();
-        ctx.moveTo(0, y);
-        ctx.lineTo(width, y);
-        ctx.stroke();
-      }
-
-      // Update & render particles
       for (let i = 0; i < particles.length; i++) {
         const p = particles[i];
         p.x += p.vx;
@@ -80,19 +81,17 @@ export default function Hero({ onOpenProjectModal }) {
         if (p.x < 0 || p.x > width) p.vx *= -1;
         if (p.y < 0 || p.y > height) p.vy *= -1;
 
-        // Mouse interaction
         if (mouse.x !== null && mouse.y !== null) {
           const dx = mouse.x - p.x;
           const dy = mouse.y - p.y;
           const dist = Math.sqrt(dx * dx + dy * dy);
-          if (dist < mouse.radius) {
+          if (dist < mouse.radius && dist > 0) {
             const force = (mouse.radius - dist) / mouse.radius;
-            p.x -= (dx / dist) * force * 1.8;
-            p.y -= (dy / dist) * force * 1.8;
+            p.x -= (dx / dist) * force * 1.5;
+            p.y -= (dy / dist) * force * 1.5;
 
-            // Connect to mouse with subtle gold beam
             ctx.beginPath();
-            ctx.strokeStyle = `rgba(214, 163, 58, ${force * 0.4})`;
+            ctx.strokeStyle = `rgba(214, 163, 58, ${force * 0.35})`;
             ctx.lineWidth = 0.8;
             ctx.moveTo(p.x, p.y);
             ctx.lineTo(mouse.x, mouse.y);
@@ -102,18 +101,21 @@ export default function Hero({ onOpenProjectModal }) {
 
         ctx.beginPath();
         ctx.arc(p.x, p.y, p.radius, 0, Math.PI * 2);
-        ctx.fillStyle = p.color === '#D6A33A' ? `rgba(214, 163, 58, ${p.alpha})` : `rgba(216, 216, 216, ${p.alpha * 0.7})`;
+        ctx.fillStyle =
+          p.color === '#D6A33A'
+            ? `rgba(214, 163, 58, ${p.alpha})`
+            : `rgba(216, 216, 216, ${p.alpha * 0.65})`;
         ctx.fill();
 
-        // Connect nearby nodes
         for (let j = i + 1; j < particles.length; j++) {
           const p2 = particles[j];
           const dx = p.x - p2.x;
           const dy = p.y - p2.y;
-          const dist = Math.sqrt(dx * dx + dy * dy);
+          const distSq = dx * dx + dy * dy;
 
-          if (dist < 130) {
-            const opacity = (1 - dist / 130) * 0.18;
+          if (distSq < 15000) {
+            const dist = Math.sqrt(distSq);
+            const opacity = (1 - dist / 122.5) * 0.16;
             ctx.beginPath();
             ctx.strokeStyle = `rgba(216, 216, 216, ${opacity})`;
             ctx.lineWidth = 0.6;
@@ -132,46 +134,53 @@ export default function Hero({ onOpenProjectModal }) {
     return () => {
       cancelAnimationFrame(animationFrameId);
       window.removeEventListener('resize', handleResize);
-      window.removeEventListener('mousemove', handleMouseMove);
-      window.removeEventListener('mouseleave', handleMouseLeave);
+      if (!isMobile) {
+        window.removeEventListener('mousemove', handleMouseMove);
+        window.removeEventListener('mouseleave', handleMouseLeave);
+      }
     };
   }, []);
 
   return (
-    <section id="home" className="relative min-h-[92vh] flex flex-col justify-between pt-32 pb-12 overflow-hidden bg-cdi-black border-b border-white/5">
+    <section
+      id="home"
+      className="relative min-h-[90vh] flex flex-col justify-between pt-32 pb-12 overflow-hidden bg-cdi-black border-b border-white/5"
+    >
+      {/* Pure CSS Precision Grid (Zero Canvas CPU Overhead) */}
+      <div className="absolute inset-0 bg-tech-grid opacity-30 pointer-events-none" aria-hidden="true" />
+
       {/* Background Interactive Canvas */}
       <canvas
         ref={canvasRef}
-        className="absolute inset-0 pointer-events-none z-0 opacity-80"
+        className="absolute inset-0 pointer-events-none z-0 opacity-75"
         aria-hidden="true"
       />
 
       {/* Atmospheric Ambient Glows */}
-      <div className="absolute top-1/4 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-cdi-gold/5 rounded-full blur-[140px] pointer-events-none" />
-      <div className="absolute top-1/3 right-10 w-[400px] h-[400px] bg-white/[0.02] rounded-full blur-[100px] pointer-events-none" />
+      <div className="absolute top-1/4 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[560px] h-[560px] bg-cdi-gold/5 rounded-full blur-[140px] pointer-events-none" />
+      <div className="absolute top-1/3 right-10 w-[360px] h-[360px] bg-white/[0.02] rounded-full blur-[100px] pointer-events-none" />
 
       {/* Main Hero Content */}
       <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 my-auto w-full text-center">
         {/* Eyebrow Badge */}
         <motion.div
-          initial={{ opacity: 0, y: 20 }}
+          initial={{ opacity: 0, y: 16 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6 }}
-          className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full border border-cdi-gold/30 bg-[#141414]/80 backdrop-blur-md mb-8 shadow-[0_0_15px_rgba(214,163,58,0.15)]"
+          transition={{ duration: 0.5 }}
+          className="inline-flex items-center gap-2.5 px-4 py-1.5 rounded-full border border-cdi-gold/35 bg-[#141414]/90 backdrop-blur-md mb-7 shadow-[0_0_15px_rgba(214,163,58,0.15)]"
         >
-          <span className="w-1.5 h-1.5 rounded-full bg-cdi-gold animate-ping" />
-          <span className="w-1.5 h-1.5 rounded-full bg-cdi-gold -ml-3.5" />
-          <span className="text-[11px] sm:text-xs font-semibold tracking-[0.22em] text-cdi-silver uppercase font-mono">
-            CHHICHHOLIYA DIGITAL INDUSTRIES
+          <span className="w-2 h-2 rounded-full bg-cdi-gold" />
+          <span className="text-[11px] sm:text-xs font-semibold tracking-[0.2em] text-cdi-silver uppercase font-mono">
+            CHHICHHOLIYA DIGITAL INDUSTRIES (CDI)
           </span>
         </motion.div>
 
-        {/* Main Headline */}
+        {/* Main H1 Headline */}
         <motion.h1
-          initial={{ opacity: 0, y: 25 }}
+          initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8, delay: 0.15 }}
-          className="text-4xl sm:text-6xl md:text-7xl lg:text-8xl font-black tracking-tight leading-[1.05] uppercase font-display max-w-5xl mx-auto"
+          transition={{ duration: 0.65, delay: 0.1 }}
+          className="text-4xl sm:text-6xl md:text-7xl lg:text-[5.25rem] font-black tracking-tight leading-[1.06] uppercase font-display max-w-5xl mx-auto"
         >
           <span className="block text-metallic">WE ENGINEER</span>
           <span className="block text-gold-gradient drop-shadow-[0_4px_30px_rgba(214,163,58,0.25)]">
@@ -179,75 +188,86 @@ export default function Hero({ onOpenProjectModal }) {
           </span>
         </motion.h1>
 
-        {/* Supporting Line */}
+        {/* Clear Value Proposition */}
         <motion.p
-          initial={{ opacity: 0, y: 20 }}
+          initial={{ opacity: 0, y: 16 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8, delay: 0.3 }}
-          className="mt-6 sm:mt-8 text-base sm:text-lg md:text-xl text-cdi-silver-muted max-w-3xl mx-auto font-normal leading-relaxed"
+          transition={{ duration: 0.65, delay: 0.2 }}
+          className="mt-6 sm:mt-7 text-base sm:text-lg md:text-xl text-cdi-silver/90 max-w-3xl mx-auto font-normal leading-relaxed"
         >
-          Building digital products, intelligent platforms and technology experiences designed for the next generation of business.
+          A digital technology &amp; product engineering company building business websites, custom web applications, mobile apps, business software, and AI automation systems for manufacturers, MSMEs, retailers, and enterprises across India.
         </motion.p>
+
+        {/* Service Area Pill */}
+        <div className="mt-4 inline-flex items-center gap-2 text-xs font-mono text-cdi-gold tracking-wider uppercase">
+          <MapPin className="w-3.5 h-3.5 shrink-0" />
+          <span>Serving Businesses Across India via Dedicated Digital Delivery</span>
+        </div>
 
         {/* Hero CTAs */}
         <motion.div
-          initial={{ opacity: 0, y: 20 }}
+          initial={{ opacity: 0, y: 16 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8, delay: 0.45 }}
-          className="mt-10 flex flex-col sm:flex-row items-center justify-center gap-4 sm:gap-6"
+          transition={{ duration: 0.65, delay: 0.3 }}
+          className="mt-9 flex flex-col sm:flex-row items-center justify-center gap-4"
         >
           <Link
             to="/contact"
             className="w-full sm:w-auto px-8 py-4 rounded-full bg-gradient-to-r from-cdi-gold via-cdi-gold-light to-cdi-gold text-cdi-black font-bold uppercase tracking-wider text-xs sm:text-sm flex items-center justify-center gap-3 shadow-[0_0_30px_rgba(214,163,58,0.4)] hover:shadow-[0_0_40px_rgba(214,163,58,0.6)] hover:scale-[1.02] transition-all duration-300 group"
           >
-            <span>Start a Project</span>
+            <span>Discuss Your Project</span>
             <ArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-1" />
           </Link>
 
           <Link
-            to="/about"
-            className="w-full sm:w-auto px-8 py-4 rounded-full bg-[#141414] hover:bg-[#1A1A1A] border border-white/10 hover:border-cdi-silver text-cdi-white font-semibold uppercase tracking-wider text-xs sm:text-sm flex items-center justify-center gap-3 transition-all duration-300"
+            to="/services"
+            className="w-full sm:w-auto px-8 py-4 rounded-full bg-[#141414] hover:bg-[#1A1A1A] border border-white/15 hover:border-cdi-silver text-cdi-white font-semibold uppercase tracking-wider text-xs sm:text-sm flex items-center justify-center gap-3 transition-all duration-300"
           >
-            <span>Explore CDI</span>
+            <span>Explore Our Services</span>
           </Link>
+
+          <a
+            href={getWhatsAppUrl('Hello CDI Team, I would like to discuss a digital project for my business.')}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="w-full sm:w-auto px-7 py-4 rounded-full bg-[#0F1814] hover:bg-[#13241D] border border-emerald-500/40 hover:border-emerald-400 text-emerald-300 font-semibold uppercase tracking-wider text-xs sm:text-sm flex items-center justify-center gap-2.5 transition-all duration-300"
+          >
+            <MessageCircle className="w-4 h-4 text-emerald-400" />
+            <span>WhatsApp Enquiry</span>
+          </a>
         </motion.div>
 
-        {/* Secondary Micro-Copy Capabilities */}
+        {/* Secondary Capabilities Navigation */}
         <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
-          transition={{ duration: 1, delay: 0.6 }}
-          className="mt-12 flex flex-wrap items-center justify-center gap-3 sm:gap-6 text-xs text-cdi-silver-muted/80 uppercase font-mono tracking-widest"
+          transition={{ duration: 0.8, delay: 0.45 }}
+          className="mt-12 flex flex-wrap items-center justify-center gap-3 sm:gap-5 text-xs text-cdi-silver-muted uppercase font-mono tracking-widest"
         >
-          <span className="flex items-center gap-1.5">
-            <Globe className="w-3.5 h-3.5 text-cdi-gold" /> Web
-          </span>
+          <Link to="/website-development-company-india" className="flex items-center gap-1.5 hover:text-cdi-gold transition-colors">
+            <Globe className="w-3.5 h-3.5 text-cdi-gold" /> Business Websites
+          </Link>
           <span className="text-white/20">•</span>
-          <span className="flex items-center gap-1.5">
-            <Layers className="w-3.5 h-3.5 text-cdi-gold" /> Mobile
-          </span>
+          <Link to="/mobile-app-development" className="flex items-center gap-1.5 hover:text-cdi-gold transition-colors">
+            <Layers className="w-3.5 h-3.5 text-cdi-gold" /> Mobile Apps
+          </Link>
           <span className="text-white/20">•</span>
-          <span className="flex items-center gap-1.5">
-            <Cpu className="w-3.5 h-3.5 text-cdi-gold" /> AI
-          </span>
+          <Link to="/ai-solutions-automation" className="flex items-center gap-1.5 hover:text-cdi-gold transition-colors">
+            <Cpu className="w-3.5 h-3.5 text-cdi-gold" /> AI &amp; Automation
+          </Link>
           <span className="text-white/20">•</span>
-          <span className="flex items-center gap-1.5">
-            <Terminal className="w-3.5 h-3.5 text-cdi-gold" /> Digital Platforms
-          </span>
+          <Link to="/business-software-development" className="flex items-center gap-1.5 hover:text-cdi-gold transition-colors">
+            <Terminal className="w-3.5 h-3.5 text-cdi-gold" /> Business Software
+          </Link>
         </motion.div>
       </div>
 
-      {/* Hero Scroll Indicator */}
-      <motion.div
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ duration: 1, delay: 0.8 }}
-        className="relative z-10 flex flex-col items-center justify-center gap-2 pt-6"
-      >
-        <div className="flex flex-col items-center gap-2 text-[10px] tracking-[0.25em] text-cdi-silver-muted uppercase font-mono">
-          <span>DIGITAL TECHNOLOGY & PRODUCT ENGINEERING</span>
+      {/* Bottom Descriptor */}
+      <div className="relative z-10 flex flex-col items-center justify-center gap-2 pt-8">
+        <div className="text-[10px] sm:text-[11px] tracking-[0.22em] text-cdi-silver-muted uppercase font-mono text-center px-4">
+          DIGITAL TECHNOLOGY &amp; PRODUCT ENGINEERING COMPANY • UDYAM REGISTERED MSME
         </div>
-      </motion.div>
+      </div>
     </section>
   );
 }
