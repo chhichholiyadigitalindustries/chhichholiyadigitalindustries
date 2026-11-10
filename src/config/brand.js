@@ -37,6 +37,11 @@ export const CDI_BRAND = {
     },
   ],
   whatsappNumber: '917232076778',
+  socials: {
+    linkedin: 'https://www.linkedin.com/in/abhishek-chhichholiya-248816448',
+    instagram: 'https://www.instagram.com/chhichholiyadigitalindustries/',
+    facebook: 'https://www.facebook.com/share/1AHD31iBUc/',
+  },
   serviceArea: 'India (Remote & Digital Technology Services Nationwide)',
   registrationLabel: 'Udyam Registered MSME • India',
   siteUrl: `${SITE_URL}/`,

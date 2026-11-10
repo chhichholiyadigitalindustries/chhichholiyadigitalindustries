@@ -15,7 +15,8 @@ import {
   Layers, 
   Cpu, 
   Terminal,
-  Code
+  Code,
+  Linkedin
 } from 'lucide-react';
 import PageHeader from '../components/PageHeader';
 import SeoHead from '../components/SeoHead';
@@ -242,8 +243,16 @@ export default function AboutPage() {
               </div>
 
               <div className="mt-6 pt-5 border-t border-white/5 flex items-center justify-between text-xs font-mono text-cdi-silver/70">
-                <span>ROLE // FOUNDER & LEAD ARCHITECT</span>
-                <span className="text-cdi-gold">CDI EXECUTIVE</span>
+                <span>ROLE // FOUNDER &amp; LEAD ARCHITECT</span>
+                <a
+                  href={CDI_BRAND.socials.linkedin}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-1.5 text-cdi-gold hover:text-cdi-gold-light transition-colors"
+                >
+                  <Linkedin className="w-3.5 h-3.5" />
+                  <span>LinkedIn →</span>
+                </a>
               </div>
             </div>
 

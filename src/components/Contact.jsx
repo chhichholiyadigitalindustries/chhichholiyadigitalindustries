@@ -9,6 +9,9 @@ import {
   AlertCircle,
   AlertTriangle,
   MessageCircle,
+  Linkedin,
+  Instagram,
+  Facebook,
 } from 'lucide-react';
 import { CDI_BRAND, getWhatsAppUrl } from '../config/brand';
 import {
@@ -148,6 +151,38 @@ export default function Contact({ preselectedService }) {
                 >
                   {CDI_BRAND.email}
                 </a>
+              </div>
+
+              <div className="p-4 rounded-2xl bg-[#0D0D0D] border border-white/10 space-y-2">
+                <span className="text-[11px] font-mono text-cdi-gold uppercase tracking-wider font-semibold block">
+                  Official Social Channels
+                </span>
+                <div className="flex flex-wrap gap-2">
+                  <a
+                    href={CDI_BRAND.socials.linkedin}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[#161616] border border-white/10 hover:border-cdi-gold/40 text-xs font-mono text-cdi-silver hover:text-cdi-gold transition-colors"
+                  >
+                    <Linkedin className="w-3.5 h-3.5 text-cdi-gold" /> LinkedIn
+                  </a>
+                  <a
+                    href={CDI_BRAND.socials.instagram}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[#161616] border border-white/10 hover:border-cdi-gold/40 text-xs font-mono text-cdi-silver hover:text-cdi-gold transition-colors"
+                  >
+                    <Instagram className="w-3.5 h-3.5 text-cdi-gold" /> Instagram
+                  </a>
+                  <a
+                    href={CDI_BRAND.socials.facebook}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[#161616] border border-white/10 hover:border-cdi-gold/40 text-xs font-mono text-cdi-silver hover:text-cdi-gold transition-colors"
+                  >
+                    <Facebook className="w-3.5 h-3.5 text-cdi-gold" /> Facebook
+                  </a>
+                </div>
               </div>
             </div>
           </div>

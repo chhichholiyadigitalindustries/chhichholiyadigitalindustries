@@ -14,6 +14,9 @@ import {
   MessageCircle,
   ExternalLink,
   AlertTriangle,
+  Linkedin,
+  Instagram,
+  Facebook,
 } from 'lucide-react';
 import PageHeader from '../components/PageHeader';
 import SeoHead from '../components/SeoHead';
@@ -259,6 +262,42 @@ export default function ContactPage() {
                       <p className="text-xs font-mono text-cdi-silver">
                         Direct requirement review &amp; scoping call scheduled within 1 business day.
                       </p>
+                    </div>
+                  </div>
+
+                  {/* Official Social Profiles */}
+                  <div className="p-4 rounded-2xl bg-[#0F0F0F] border border-white/5 space-y-2.5">
+                    <span className="text-[11px] font-mono text-cdi-silver-muted uppercase tracking-wider block">
+                      OFFICIAL SOCIAL CHANNELS
+                    </span>
+                    <div className="flex flex-wrap gap-2.5">
+                      <a
+                        href={CDI_BRAND.socials.linkedin}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="inline-flex items-center gap-2 px-3.5 py-2 rounded-xl bg-[#161616] border border-white/10 hover:border-cdi-gold/50 text-xs font-mono text-cdi-silver hover:text-cdi-gold transition-colors"
+                      >
+                        <Linkedin className="w-3.5 h-3.5 text-cdi-gold" />
+                        <span>LinkedIn</span>
+                      </a>
+                      <a
+                        href={CDI_BRAND.socials.instagram}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="inline-flex items-center gap-2 px-3.5 py-2 rounded-xl bg-[#161616] border border-white/10 hover:border-cdi-gold/50 text-xs font-mono text-cdi-silver hover:text-cdi-gold transition-colors"
+                      >
+                        <Instagram className="w-3.5 h-3.5 text-cdi-gold" />
+                        <span>Instagram</span>
+                      </a>
+                      <a
+                        href={CDI_BRAND.socials.facebook}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="inline-flex items-center gap-2 px-3.5 py-2 rounded-xl bg-[#161616] border border-white/10 hover:border-cdi-gold/50 text-xs font-mono text-cdi-silver hover:text-cdi-gold transition-colors"
+                      >
+                        <Facebook className="w-3.5 h-3.5 text-cdi-gold" />
+                        <span>Facebook</span>
+                      </a>
                     </div>
                   </div>
                 </div>

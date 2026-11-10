@@ -22,10 +22,12 @@ export function buildOrganizationSchema() {
     description:
       'Chhichholiya Digital Industries (CDI) is an Indian digital technology and product engineering company building business websites, custom web applications, mobile apps, business software, and AI automation systems for businesses across India.',
     email: CDI_BRAND.email,
+    sameAs: [CDI_BRAND.socials.instagram, CDI_BRAND.socials.facebook],
     founder: {
       '@type': 'Person',
       name: CDI_BRAND.founder.name,
       jobTitle: CDI_BRAND.founder.role,
+      sameAs: [CDI_BRAND.socials.linkedin],
     },
     areaServed: {
       '@type': 'Country',

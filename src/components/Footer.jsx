@@ -1,6 +1,6 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { ArrowUp, Mail, Phone, MessageCircle } from 'lucide-react';
+import { ArrowUp, Mail, Phone, MessageCircle, Linkedin, Instagram, Facebook } from 'lucide-react';
 import BrandLogo from './BrandLogo';
 import { CDI_BRAND, getWhatsAppUrl } from '../config/brand';
 
@@ -68,7 +68,7 @@ export default function Footer() {
                 ))}
               </div>
 
-              <div className="pt-2">
+              <div className="pt-2 flex flex-wrap items-center gap-2.5">
                 <a
                   href={getWhatsAppUrl('Hello CDI Team, I would like to discuss a digital project for my business.')}
                   target="_blank"
@@ -76,7 +76,40 @@ export default function Footer() {
                   className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-[#101010] border border-emerald-500/30 hover:border-emerald-400 text-emerald-400 text-xs font-mono uppercase tracking-wider transition-colors"
                 >
                   <MessageCircle className="w-3.5 h-3.5" />
-                  <span>WhatsApp Enquiry</span>
+                  <span>WhatsApp</span>
+                </a>
+
+                <a
+                  href={CDI_BRAND.socials.linkedin}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  aria-label="Founder Abhishek Chhichholiya on LinkedIn"
+                  title="Founder LinkedIn"
+                  className="p-2.5 rounded-xl bg-[#101010] border border-white/10 hover:border-cdi-gold/50 text-cdi-silver hover:text-cdi-gold transition-colors"
+                >
+                  <Linkedin className="w-4 h-4" />
+                </a>
+
+                <a
+                  href={CDI_BRAND.socials.instagram}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  aria-label="Chhichholiya Digital Industries on Instagram"
+                  title="CDI Instagram"
+                  className="p-2.5 rounded-xl bg-[#101010] border border-white/10 hover:border-cdi-gold/50 text-cdi-silver hover:text-cdi-gold transition-colors"
+                >
+                  <Instagram className="w-4 h-4" />
+                </a>
+
+                <a
+                  href={CDI_BRAND.socials.facebook}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  aria-label="Chhichholiya Digital Industries on Facebook"
+                  title="CDI Facebook Page"
+                  className="p-2.5 rounded-xl bg-[#101010] border border-white/10 hover:border-cdi-gold/50 text-cdi-silver hover:text-cdi-gold transition-colors"
+                >
+                  <Facebook className="w-4 h-4" />
                 </a>
               </div>
             </div>
